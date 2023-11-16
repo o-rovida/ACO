@@ -14,35 +14,7 @@ class Arris():
         n = (1/self.distance)
         return n*self.pheromone
 
-initial_pheromone = 0.1
-
-#lista dos vertices do grafo, ou seja os pontos que serao visitados
-#não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles, além do id ou nome
-vertex_list = ['A','B','C','D','E']
-
-#lista das distancias entre os vertices do grafo
-distance_dict = {
-    'A': {'B':6,'C':7,'D':9,'E':8},
-    'B': {'A':6,'C':3,'D':8,'E':9},
-    'C': {'A':7,'B':3,'D':6,'E':5},
-    'D': {'A':9,'B':8,'C':6,'E':3},
-    'E': {'A':8,'B':9,'C':5,'D':3}
-}
-
-arris_list = []
-
-#considerando um grafo completo, ou seja, todos os vertices são interligados
-#cria-se uma lista de instancias da classe Arris, que representa as arestas do grafo
-#o feromonio inicial de cada aresta é o mesmo, nesse caso 0.1
-
-for origin in vertex_list:
-    for destination in vertex_list:
-        if origin != destination:
-            arris_list.append(Arris(origin=origin, destination=destination, distance=distance_dict[origin][destination], pheromone=initial_pheromone))
-
-#print([f'{aris.origin} -> {aris.destination}'for aris in arris_list])
-
-#roleta
+#metodo de roleta
 class Roulette():
     def __init__(self, itens):
         self.itens = itens
@@ -53,7 +25,7 @@ class Roulette():
         #retorna um item aleatorio, com probabilidade proporcional a sua avaliação
         return random.choices(self.itens, weights=self.probablities)[0]
 
-#torneio
+#metodo de torneio
 class Tourney():
     def __init__(self, itens):
         self.itens = itens
@@ -72,16 +44,35 @@ class Tourney():
         else:
             return random.choices([competitor_1, competitor_2])[0]
 
+class CompleteGraph():
+    def __init__(self, vertex_list, distance_dict):
+        self.vertex_list = vertex_list
+        self.distance_dict = distance_dict
+
+        arris_list = []
+
+        #considerando um grafo completo, ou seja, todos os vertices são interligados
+        #cria-se uma lista de instancias da classe Arris, que representa as arestas do grafo
+        #o feromonio inicial de cada aresta é o mesmo, nesse caso 0.1
+        for origin in vertex_list:
+            for destination in vertex_list:
+                if origin != destination:
+                    arris_list.append(Arris(origin=origin, destination=destination, distance=distance_dict[origin][destination], pheromone=initial_pheromone))
+
+        self.arris_list = arris_list
+
+
 class Ant():
-    def __init__ (self, current_vertex):
+    def __init__ (self, current_vertex, graph):
         self.current_vertex = current_vertex
         self.visited_vertex = []
         self.visited_vertex.append(current_vertex)
+        self.graph = graph
 
     def move(self):
         current_vertex = self.current_vertex
         possible_destinations = []
-        for arris in arris_list:
+        for arris in self.graph.arris_list:
             if arris.origin == current_vertex and arris.destination not in self.visited_vertex:
                 possible_destinations.append(arris)
 
@@ -109,20 +100,38 @@ class Ant():
         distance = 0
         # calcula a distancia total percorrida pela formiga
         for i in range(len(path)-1):
-            distance += distance_dict[self.visited_vertex[i]][self.visited_vertex[i+1]]
+            distance += self.graph.distance_dict[self.visited_vertex[i]][self.visited_vertex[i+1]]
         return distance
-    
-generation_1 = []
 
-for vertex in vertex_list:
-    generation_1.append(Ant(vertex))
+if __name__ == "__main__":
+    #feromonio inicial de todas as arestas
+    initial_pheromone = 0.1
 
+    #lista dos vertices do grafo, ou seja os pontos que serao visitados
+    #não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles, além do id ou nome
+    vertex_list = ['A','B','C','D','E']
 
-for ant in generation_1:
-    keep_moving = True
-    
-    while keep_moving:
-        keep_moving = ant.move()
+    #lista das distancias entre os vertices do grafo
+    distance_dict = {
+        'A': {'B':6,'C':7,'D':9,'E':8},
+        'B': {'A':6,'C':3,'D':8,'E':9},
+        'C': {'A':7,'B':3,'D':6,'E':5},
+        'D': {'A':9,'B':8,'C':6,'E':3},
+        'E': {'A':8,'B':9,'C':5,'D':3}
+    }
 
-    print(ant.visited_vertex)
-    print(ant.calculate_distance())
+    grafo = CompleteGraph(vertex_list, distance_dict)
+
+    generation_1 = []
+
+    for vertex in vertex_list:
+        generation_1.append(Ant(vertex, grafo))
+
+    for ant in generation_1:
+        keep_moving = True
+        
+        while keep_moving:
+            keep_moving = ant.move()
+
+        print(ant.visited_vertex)
+        print(ant.calculate_distance(distance_dict))
