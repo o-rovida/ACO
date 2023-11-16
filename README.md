@@ -1,0 +1,3 @@
+Ant Colony Optimization Algorithm for the Traveling Salesman Problem
+
+This Python script implements an Ant Colony Optimization (ACO) algorithm to solve the Traveling Salesman Problem (TSP). The TSP involves finding the shortest possible route that visits a given set of cities and returns to the starting city. The ACO algorithm simulates the foraging behavior of ants to find an optimal or near-optimal solution.
