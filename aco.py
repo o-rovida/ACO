@@ -13,7 +13,33 @@ class Arris():
     def evaliate_arris(self):
         n = (1/self.distance)
         return n*self.pheromone
+    
+    def update_pheromone(self, generation, update_constant, evaporation_constant):
+        # Variável para armazenar a adição total de feromônio para esta aresta
+        pheromone_addition = 0
 
+        # Itera sobre todas as formigas na geração
+        for ant in generation:
+            # Calcula o feromônio a ser depositado por esta formiga nesta aresta
+            pheromone = update_constant / ant.calculate_distance()
+
+            # Itera sobre os vértices visitados pela formiga
+            for i in range(len(ant.visited_vertex)):
+                # Obtém o vértice atual e o próximo vértice no caminho da formiga,
+                # garantindo que o próximo vértice seja o primeiro se o atual for o último
+                vertex = ant.visited_vertex[i]
+                next_vertex_index = (i + 1) % len(ant.visited_vertex)
+                next_vertex = ant.visited_vertex[next_vertex_index]
+
+                # Verifica se a aresta liga o vértice atual ao próximo vértice no caminho
+                if vertex == self.origin and next_vertex == self.destination:
+                    # Adiciona o feromônio depositado por esta formiga nesta aresta
+                    pheromone_addition += pheromone
+
+        # Atualiza o feromônio da aresta considerando a evaporação e a adição de feromônio
+        self.pheromone = (1 - evaporation_constant) * self.pheromone + pheromone_addition
+
+    
 #metodo de roleta
 class Roulette():
     def __init__(self, itens):
@@ -61,6 +87,10 @@ class CompleteGraph():
 
         self.arris_list = arris_list
 
+    def update_pheromone(self, generation, update_constant, evaporation_constant):
+        
+        for arris in self.arris_list:
+            arris.update_pheromone(generation, update_constant, evaporation_constant)
 
 class Ant():
     def __init__ (self, current_vertex, graph):
@@ -91,21 +121,28 @@ class Ant():
             return False
         
     def calculate_distance(self):
+
+        path = []      
         # cria uma lista com o caminho percorrido pela formiga
-        path = self.visited_vertex
-        # adiciona o primeiro vertice no final da lista, para que o caminho seja fechado
-        # o caxeiro viajante deve voltar para o ponto de partida
+        path = self.visited_vertex.copy()
+
+            # adiciona o primeiro vertice no final da lista, para que o caminho seja fechado
+            # o caxeiro viajante deve voltar para o ponto de partida
         path.append(self.visited_vertex[0])
 
         distance = 0
         # calcula a distancia total percorrida pela formiga
         for i in range(len(path)-1):
-            distance += self.graph.distance_dict[self.visited_vertex[i]][self.visited_vertex[i+1]]
+            #print(path[i], path[i+1])
+            distance += self.graph.distance_dict[path[i]][path[i+1]]
+        
         return distance
 
 if __name__ == "__main__":
     #feromonio inicial de todas as arestas
     initial_pheromone = 0.1
+    evaporation_constant = 0.01
+    update_constant = 10
 
     #lista dos vertices do grafo, ou seja os pontos que serao visitados
     #não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles, além do id ou nome
@@ -134,4 +171,8 @@ if __name__ == "__main__":
             keep_moving = ant.move()
 
         print(ant.visited_vertex)
-        print(ant.calculate_distance(distance_dict))
+        print(ant.calculate_distance())
+
+    grafo.update_pheromone(generation_1, update_constant, evaporation_constant)
+    for arris in grafo.arris_list:
+        print(arris.pheromone)
