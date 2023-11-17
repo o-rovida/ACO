@@ -28,11 +28,13 @@ class Arris():
                 # Obtém o vértice atual e o próximo vértice no caminho da formiga,
                 # garantindo que o próximo vértice seja o primeiro se o atual for o último
                 vertex = ant.visited_vertex[i]
+
+                # obtém o próximo vértice no caminho da formiga, o mod é usado para garantir que o índice não seja maior que o tamanho da lista
                 next_vertex_index = (i + 1) % len(ant.visited_vertex)
                 next_vertex = ant.visited_vertex[next_vertex_index]
 
                 # Verifica se a aresta liga o vértice atual ao próximo vértice no caminho
-                if vertex == self.origin and next_vertex == self.destination:
+                if (vertex == self.origin and next_vertex == self.destination) or (vertex == self.destination and next_vertex == self.origin):
                     # Adiciona o feromônio depositado por esta formiga nesta aresta
                     pheromone_addition += pheromone
 
@@ -150,10 +152,10 @@ if __name__ == "__main__":
 
     #lista das distancias entre os vertices do grafo
     distance_dict = {
-        'A': {'B':6,'C':7,'D':9,'E':8},
+        'A': {'B':6,'C':7,'D':6,'E':8},
         'B': {'A':6,'C':3,'D':8,'E':9},
         'C': {'A':7,'B':3,'D':6,'E':5},
-        'D': {'A':9,'B':8,'C':6,'E':3},
+        'D': {'A':6,'B':8,'C':6,'E':3},
         'E': {'A':8,'B':9,'C':5,'D':3}
     }
 
@@ -175,4 +177,4 @@ if __name__ == "__main__":
 
     grafo.update_pheromone(generation_1, update_constant, evaporation_constant)
     for arris in grafo.arris_list:
-        print(arris.pheromone)
+        print(f'{arris.origin} -> {arris.destination} : {arris.pheromone}')
