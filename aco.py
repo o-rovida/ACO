@@ -33,7 +33,7 @@ class Arris():
                 next_vertex_index = (i + 1) % len(ant.visited_vertex)
                 next_vertex = ant.visited_vertex[next_vertex_index]
 
-                # Verifica se a aresta liga o vértice atual ao próximo vértice no caminho
+                # verifica se formiga passou por esta aresta, idependente da direção
                 if (vertex == self.origin and next_vertex == self.destination) or (vertex == self.destination and next_vertex == self.origin):
                     # Adiciona o feromônio depositado por esta formiga nesta aresta
                     pheromone_addition += pheromone
