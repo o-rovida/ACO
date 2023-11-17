@@ -206,9 +206,20 @@ if __name__ == "__main__":
     for epoch in aco.epochs_dict:
         print(f'Epoch {epoch}: {aco.epochs_dict[epoch]["evaluation"]}')
 
-    #for ant in aco.last_generation:
-        #print(ant.visited_vertex)
-        #print(ant.calculate_distance())
+    #imprime o caminho percorrido por cada formiga na ultima geração
+    for ant in aco.last_generation:
+        print(ant.visited_vertex)
+        print(ant.calculate_distance())
 
-    #for arris in aco.graph.arris_list:
-        #print(f'{arris.origin} -> {arris.destination} : {arris.pheromone}')
+    #imprime o feromonio de cada aresta do grafo ao final da execução do algoritmo
+    for arris in aco.graph.arris_list:
+        print(f'{arris.origin} -> {arris.destination} : {arris.pheromone}')
+    
+    #plota um grafico com a evolução da avaliação média da população a cada geração
+    import matplotlib.pyplot as plt
+
+    plt.plot(list(aco.epochs_dict.keys()), [aco.epochs_dict[epoch]["evaluation"] for epoch in aco.epochs_dict.keys()], color='green')
+    plt.xlabel('Epoch')
+    plt.ylabel('Evaluation')
+    plt.show()
+
