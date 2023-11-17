@@ -1,4 +1,5 @@
 import random
+import numpy as np
 
 # classe que representa uma aresta do grafo, ou seja, o caminho entre dois pontos
 class Arris():
@@ -145,6 +146,7 @@ if __name__ == "__main__":
     initial_pheromone = 0.1
     evaporation_constant = 0.01
     update_constant = 10
+    number_of_epochs = 20
 
     #lista dos vertices do grafo, ou seja os pontos que serao visitados
     #não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles, além do id ou nome
@@ -161,20 +163,27 @@ if __name__ == "__main__":
 
     grafo = CompleteGraph(vertex_list, distance_dict)
 
-    generation_1 = []
-
-    for vertex in vertex_list:
-        generation_1.append(Ant(vertex, grafo))
-
-    for ant in generation_1:
-        keep_moving = True
+    for i in range(number_of_epochs):
         
-        while keep_moving:
-            keep_moving = ant.move()
+        generation = []
 
+        for vertex in grafo.vertex_list:
+            generation.append(Ant(vertex, grafo))
+
+        for ant in generation:
+            
+            keep_moving = True
+        
+            while keep_moving:
+                keep_moving = ant.move()
+
+        grafo.update_pheromone(generation, update_constant, evaporation_constant)
+
+        print(f'epoch {i}: {np.mean([ant.calculate_distance() for ant in generation])}')
+
+    for ant in generation:
         print(ant.visited_vertex)
         print(ant.calculate_distance())
 
-    grafo.update_pheromone(generation_1, update_constant, evaporation_constant)
     for arris in grafo.arris_list:
         print(f'{arris.origin} -> {arris.destination} : {arris.pheromone}')
