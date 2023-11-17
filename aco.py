@@ -147,7 +147,7 @@ class Ant():
         return distance
     
 class ACO():
-    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1, evaporation_constant=0.01, update_constant=2, number_of_epochs=100, method_of_selection='roulette'):
+    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1, evaporation_constant=0.01, update_constant=2, number_of_epochs=1000, method_of_selection='roulette'):
         self.initial_pheromone = initial_pheromone
         self.graph = CompleteGraph(vertex_list, distance_dict, self.initial_pheromone)
         self.evaporation_constant = evaporation_constant
