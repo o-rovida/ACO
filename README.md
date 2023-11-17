@@ -25,7 +25,7 @@ Implementa o algoritmo de Otimização por Colônia de Formigas. Inicializa um g
 ## Uso
 
 <pre>
-'''python
+<code>
 if __name__ == "__main__":
     # Define os vértices do grafo e as distâncias
     vertex_list = ['A', 'B', 'C', 'D', 'E']
@@ -75,7 +75,7 @@ if __name__ == "__main__":
     plt.xlabel('Época')
     plt.ylabel('Avaliação')
     plt.show()
-'''
+</code>
 </pre>
 
 Este script demonstra o algoritmo ACO aplicado ao PCV usando um grafo de exemplo. Modifique as variáveis **'vertex_list'** e **'distance_dict'** para testar o algoritmo com diferentes grafos.
