@@ -26,7 +26,6 @@ Implementa o algoritmo de Otimização por Colônia de Formigas. Inicializa um g
 
 <pre>
 <code>
-if __name__ == "__main__":
     # Define os vértices do grafo e as distâncias
     vertex_list = ['A', 'B', 'C', 'D', 'E']
     distance_dict = {
