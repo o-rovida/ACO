@@ -11,9 +11,9 @@ class Arris():
 
     # calcula a avaliação da aresta, que é o produto da distancia sobre 1 e feromonio
     # quanto maior a avaliação, maior a probabilidade de ser escolhida
-    def evaluate_arris(self):
+    def evaluate_arris(self, distance_expoent, pheromone_expoent):
         n = (1/self.distance)
-        return n*self.pheromone
+        return (n**distance_expoent)*(self.pheromone**pheromone_expoent)
     
     def update_pheromone(self, generation, update_constant, evaporation_constant):
         # Variável para armazenar a adição total de feromônio para esta aresta
@@ -45,19 +45,23 @@ class Arris():
     
 #metodo de roleta
 class Roulette():
-    def __init__(self, itens):
+    def __init__(self, itens, distance_expoent, pheromone_expoent):
         self.itens = itens
-        self.total = sum([item.evaluate_arris() for item in itens])
-        self.probablities = [item.evaluate_arris()/self.total for item in itens]
-
+        self.distance_expoent = distance_expoent
+        self.pheromone_expoent = pheromone_expoent
+        self.total = sum([item.evaluate_arris(self.distance_expoent, self.pheromone_expoent) for item in itens])
+        self.probablities = [item.evaluate_arris(self.distance_expoent, self.pheromone_expoent)/self.total for item in itens]
+        
     def spin(self):
         #retorna um item aleatorio, com probabilidade proporcional a sua avaliação
         return random.choices(self.itens, weights=self.probablities)[0]
 
 #metodo de torneio
 class Tourney():
-    def __init__(self, itens):
+    def __init__(self, itens, distance_expoent, pheromone_expoent):
         self.itens = itens
+        self.distance_expoent = distance_expoent
+        self.pheromone_expoent = pheromone_expoent
 
     def compete(self):
         #seleciona dois competidores aleatoriamente
@@ -65,9 +69,9 @@ class Tourney():
         competitor_2 = random.choices(self.itens)[0]
 
         #compara os competidores e retorna o vencedor
-        if competitor_1.evaluate_arris() > competitor_2.evaluate_arris():
+        if competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) > competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_1
-        elif competitor_1.evaluate_arris() < competitor_2.evaluate_arris():
+        elif competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) < competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_2
         #se os competidores tiverem a mesma avaliação, retorna um deles aleatoriamente
         else:
@@ -97,12 +101,14 @@ class CompleteGraph():
             arris.update_pheromone(generation, update_constant, evaporation_constant)
 
 class Ant():
-    def __init__ (self, current_vertex, graph, method_of_selection):
+    def __init__ (self, current_vertex, graph, method_of_selection, distance_expoent, pheromone_expoent):
         self.current_vertex = current_vertex
         self.visited_vertex = []
         self.visited_vertex.append(current_vertex)
         self.graph = graph
         self.method_of_selection = method_of_selection
+        self.distance_expoent = distance_expoent
+        self.pheromone_expoent = pheromone_expoent
 
     def move(self):
         current_vertex = self.current_vertex
@@ -114,9 +120,9 @@ class Ant():
         if len(possible_destinations) > 0:
             
             if self.method_of_selection == 'roulette':
-                next_vertex = Roulette(possible_destinations).spin().destination
+                next_vertex = Roulette(possible_destinations, self.distance_expoent, self.pheromone_expoent).spin().destination
             elif self.method_of_selection == 'tourney':
-                next_vertex = Tourney(possible_destinations).compete().destination
+                next_vertex = Tourney(possible_destinations, self.distance_expoent, self.pheromone_expoent).compete().destination
             self.visited_vertex.append(next_vertex)
             self.current_vertex = next_vertex
 
@@ -147,13 +153,15 @@ class Ant():
         return distance
     
 class ACO():
-    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1, evaporation_constant=0.01, update_constant=2, number_of_epochs=1000, method_of_selection='roulette'):
+    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1, evaporation_constant=0.01, update_constant=2, number_of_epochs=1000, method_of_selection='roulette', distance_expoent=1, pheromone_expoent=1):
         self.initial_pheromone = initial_pheromone
         self.graph = CompleteGraph(vertex_list, distance_dict, self.initial_pheromone)
         self.evaporation_constant = evaporation_constant
         self.update_constant = update_constant
         self.number_of_epochs = number_of_epochs
         self.method_of_selection = method_of_selection
+        self.distance_expoent = distance_expoent
+        self.pheromone_expoent = pheromone_expoent
         self.last_generation = []
         self.epochs_dict = {}
 
@@ -163,7 +171,7 @@ class ACO():
             self.last_generation = []
 
             for vertex in self.graph.vertex_list:
-                self.last_generation.append(Ant(vertex, self.graph, self.method_of_selection))
+                self.last_generation.append(Ant(vertex, self.graph, self.method_of_selection, self.distance_expoent, self.pheromone_expoent))
 
             for ant in self.last_generation:
                 
@@ -196,9 +204,11 @@ if __name__ == "__main__":
               distance_dict, 
               initial_pheromone=0.1, 
               evaporation_constant=0.01, 
-              update_constant=2, 
-              number_of_epochs=1000,
-              method_of_selection='roulette')
+              update_constant=1.5, 
+              number_of_epochs=50,
+              method_of_selection='roulette',
+              distance_expoent=1,
+              pheromone_expoent=1.5)
 
     #executa o algoritmo
     aco.run()
@@ -222,4 +232,3 @@ if __name__ == "__main__":
     plt.xlabel('Epoch')
     plt.ylabel('Evaluation')
     plt.show()
-
