@@ -15,17 +15,25 @@ def euclidean_distance(a, b):
 class DataObject:
     def __init__(self, id, data):
         self.id = id
-        self.data = data
+        if isinstance(data, np.ndarray):
+            self.data = data
+        else:
+            try:
+                self.data = np.array(data)
+            except:
+                raise Exception("The data must be a list or a numpy array")
 
     def equals(self, data_object):
+
         if isinstance(data_object, DataObject):
-            if self.id == data_object.id and self.data == data_object.data:
+            if (self.id == data_object.id) and (self.data.all() == data_object.data.all()):
                 return True
+            
         else:
             return False
         
     def in_list(self, data_object_list):
-        
+    
         for object in data_object_list:
             if self.equals(object):
                 return True
@@ -48,7 +56,7 @@ class ACOCGraph:
     
     def update_pheromone_matrix(self, ant_rank, evaporation_constant=0.01):
         # para cada formiga na lista de elite
-        for ant in ant_rank['ant']:
+        for ant in ant_rank:
             # para cada cluster
             for i in range(self.number_of_clusters):
                 # para cada objeto do cluster
@@ -60,10 +68,11 @@ class Cluster:
     def __init__(self, id, data_object_list):
         self.id = id
         self.data_object_list = data_object_list
-        self.cluster_center = [self.calculate_cluster_center()]
+        self.cluster_center = self.calculate_cluster_center()
 
     def calculate_cluster_center(self):
         center = []
+
         if not self.data_object_list:
             return center
         
@@ -132,11 +141,11 @@ class Ant():
 
             probability_list = [p/sum(probability_list) for p in probability_list]
  
-            if strategy == 'greedy':
+            if strategy == 'greedy': # escolhe o cluster com maior probabilidade
                 cluster = probability_list.index(max(probability_list))
                 self.clusters[cluster].append_object(next_object)
                 
-            elif strategy == 'random':
+            elif strategy == 'random': # escolhe o cluster aleatoriamente, com probabilidade proporcional a avaliação de cada cluster
                 cluster = random.choices(range(self.graph.number_of_clusters), weights=probability_list)[0]
                 self.clusters[cluster].append_object(next_object)
 
@@ -151,61 +160,90 @@ class Ant():
             return False
         
     def evaluate_solution(self):
+        # calcula o custo da solução
         cost = 0
         for cluster in self.clusters.values():
             cost_cluster = 0
             for obj in cluster.data_object_list:
                 cost += euclidean_distance(obj.data, cluster.cluster_center)
+            # divide o custo do cluster pelo numero de objetos no cluster
             cost += cost_cluster/len(cluster.data_object_list)
+        # custo é a soma da media dos custos de cada cluster
         return cost
         
+class ACOC():
+    def __init__ (self, graph, number_of_epochs, number_of_clusters, number_of_ant, distance_expoent, pheromone_expoent, number_of_elite, evaporation_constant, strategy='greedy'):
+        self.graph = graph
+        self.number_of_epochs = number_of_epochs
+        self.number_of_clusters = number_of_clusters
+        self.number_of_ant = number_of_ant
+        self.distance_expoent = distance_expoent
+        self.pheromone_expoent = pheromone_expoent
+        self.number_of_elite = number_of_elite
+        self.evaporation_constant = evaporation_constant
+        self.better_solution = None
+        self.strategy = strategy
+        self.last_generation = []
+        self.epochs_dict = {}
+
+    def run(self):
+        
+        for i in range(self.number_of_epochs):
+
+            ant_list = []
+
+            for _ in range(self.number_of_ant):
+
+                ant_list.append(Ant(self.graph, self.distance_expoent, self.pheromone_expoent))
+
+            for ant in ant_list:
+                keep_moving = True
+                while keep_moving:
+                    keep_moving = ant.move(strategy=self.strategy)
+            
+            ant_rank = pd.DataFrame(data=[[ant, ant.evaluate_solution()] for ant in ant_list], columns=['ant', 'cost'])
+            ant_rank = ant_rank.sort_values(by='cost', ascending=True, ignore_index=True)
+
+            ant_rank = ant_rank.head(self.number_of_elite)
+
+            if self.better_solution is None:
+                self.better_solution = ant_rank['ant'][0]
+            
+            elif ant_rank['cost'][0] < self.better_solution.evaluate_solution():
+                self.better_solution = ant_rank['ant'][0]
+
+            self.graph.update_pheromone_matrix(ant_rank['ant'], evaporation_constant=self.evaporation_constant)
+
+            self.last_generation = ant_rank['ant']
+            self.epochs_dict[i] = ant_rank
+
 if __name__ == "__main__":
 
-    number_of_epochs = 50
-    number_of_clusters = 3
-    number_of_ant = 10
-    distance_expoent = 1
-    pheromone_expoent = 1.5
-    better_solution = None
-    number_of_elite = 2
-    evaporation_constant = 0.01
-
-    
-    data = pd.read_csv('dataset/wine.csv', sep=',', header=None)
-    data = data.drop([0], axis=1)
-
+    dataset = pd.read_csv('dataset/wine.csv', sep=',', header=None)
+    target = dataset.iloc[:,0]
+    data = dataset.drop([0], axis=1)
     data_list = data.values.tolist()
-
     data_object_list = []
-
+    
     for i in range(100): #range(len(data_list)):
         data_object_list.append(DataObject(i, data_list[i]))
 
     graph = ACOCGraph(data_object_list, number_of_clusters=3, initial_pheromone=0.1)
+
+    acoc = ACOC(graph,
+                number_of_epochs=5, 
+                number_of_clusters=3, 
+                number_of_ant=10, 
+                distance_expoent=1, 
+                pheromone_expoent=1.5, 
+                number_of_elite=2, 
+                evaporation_constant=0.01)
     
-    for i in range(number_of_epochs):
-        
-        print('Epoch: ', i)
+    acoc.run()
 
-        ant_list = []
+    print(acoc.better_solution.evaluate_solution())
 
-        for _ in range(number_of_ant):
-            ant_list.append(Ant(graph, distance_expoent=distance_expoent, pheromone_expoent=pheromone_expoent))
-
-        for ant in ant_list:
-            keep_moving = True
-            while keep_moving:
-                keep_moving = ant.move(strategy='greedy')
-       
-        ant_rank = pd.DataFrame(data=[[ant, ant.evaluate_solution()] for ant in ant_list], columns=['ant', 'cost'])
-        ant_rank = ant_rank.sort_values(by='cost', ascending=True, ignore_index=True)
-        ant_rank = ant_rank.head(number_of_elite)
-
-        if better_solution is None:
-            better_solution = ant_rank['ant'][0]
-        elif ant_rank['cost'][0] < better_solution.evaluate_solution():
-            better_solution = ant_rank['ant'][0]
-
-        graph.update_pheromone_matrix(ant_rank, evaporation_constant=evaporation_constant)
-
-        print(ant_rank.head(1))
+    for cluster in acoc.better_solution.clusters.values():
+        print(cluster.cluster_center)
+        print(len(cluster.data_object_list))
+        print('-----------------')
