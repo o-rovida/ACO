@@ -3,22 +3,22 @@ Este é um exemplo de implementação do Algoritmo de Otimização por Colônia 
 
 ## Estrutura do Código
 ### Classes Principais
-**Arris**
+**Arris:**
 Representa uma aresta do grafo, definindo o caminho entre dois pontos. Calcula a avaliação da aresta, que é usada para determinar a probabilidade de escolha dessa aresta.
 
-**Roulette**
+**Roulette:**
 Implementa a seleção de itens com base em uma roleta, onde a probabilidade de seleção é proporcional à avaliação dos itens.
 
-**Tourney**
+**Tourney:**
 Realiza uma competição entre dois competidores escolhidos aleatoriamente, garantindo que eles tenham avaliações diferentes.
 
-**CompleteGraph**
+**CompleteGraph:**
 Representa um grafo completo, onde todos os vértices estão interligados. Mantém uma lista de instâncias da classe Arris que representa as arestas do grafo.
 
-**Ant**
+**Ant:**
 Modela o comportamento de uma formiga, incluindo movimento e cálculo da distância percorrida.
 
-**ACO**
+**ACO:**
 A classe principal que orquestra a execução do algoritmo ACO. Inclui métodos para inicialização, execução do algoritmo e atualização de feromônio.
 
 ### Execução

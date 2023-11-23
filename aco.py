@@ -199,6 +199,8 @@ class ACO():
         self.last_generation = []
         self.epochs_dict = {}
 
+        self.run()
+
     def run(self):
         for i in range(self.number_of_epochs):
         
@@ -243,9 +245,6 @@ if __name__ == "__main__":
               method_of_selection='roulette',
               distance_expoent=1,
               pheromone_expoent=2)
-
-    #executa o algoritmo
-    aco.run()
 
     for epoch in aco.epochs_dict:
         print(f'Epoch {epoch}: {aco.epochs_dict[epoch]["evaluation"]}')
