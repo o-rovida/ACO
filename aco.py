@@ -1,19 +1,27 @@
 import random
 import numpy as np
-
-# classe que representa uma aresta do grafo, ou seja, o caminho entre dois pontos
+# Define a seed for the random number generator, para reproduzir os resultados
+random.seed(42)
+# classe que representa uma aresta do grafo, ou seja, o caminho entre dois pontos.
 class Arris():
-    def __init__(self, origin, destination, distance, pheromone):
+    def __init__(self, 
+    origin:str, 
+    destination:str, 
+    distance:float, 
+    pheromone:float):
+        
         self.origin = origin
         self.destination = destination
         self.distance = distance
         self.pheromone = pheromone
 
-    # calcula a avaliação da aresta, que é o produto da distancia sobre 1 e feromonio
-    # quanto maior a avaliação, maior a probabilidade de ser escolhida
+    # calcula a avaliação da aresta.
+    # quanto maior a avaliação, maior a probabilidade de ser escolhida.
+
     def evaluate_arris(self, distance_expoent, pheromone_expoent):
-        n = (1/self.distance)
-        return (n**distance_expoent)*(self.pheromone**pheromone_expoent)
+        # é usado o inverso da distancia, ou seja, é inversamente proporcional a distancia
+        distance_inverse = (1/self.distance)
+        return (distance_inverse**distance_expoent)*(self.pheromone**pheromone_expoent)
     
     def update_pheromone(self, generation, update_constant, evaporation_constant):
         # Variável para armazenar a adição total de feromônio para esta aresta
@@ -27,14 +35,14 @@ class Arris():
             # Itera sobre os vértices visitados pela formiga
             for i in range(len(ant.visited_vertex)):
                 # Obtém o vértice atual e o próximo vértice no caminho da formiga,
-                # garantindo que o próximo vértice seja o primeiro se o atual for o último
+                # Garantindo que o próximo vértice seja o primeiro se o atual for o último
                 vertex = ant.visited_vertex[i]
 
-                # obtém o próximo vértice no caminho da formiga, o mod é usado para garantir que o índice não seja maior que o tamanho da lista
+                # Obtém o próximo vértice no caminho da formiga, o mod é usado para garantir que o índice não seja maior que o tamanho da lista
                 next_vertex_index = (i + 1) % len(ant.visited_vertex)
                 next_vertex = ant.visited_vertex[next_vertex_index]
 
-                # verifica se formiga passou por esta aresta, idependente da direção
+                # Verifica se formiga passou por esta aresta, idependente da direção
                 if (vertex == self.origin and next_vertex == self.destination) or (vertex == self.destination and next_vertex == self.origin):
                     # Adiciona o feromônio depositado por esta formiga nesta aresta
                     pheromone_addition += pheromone
@@ -42,43 +50,49 @@ class Arris():
         # Atualiza o feromônio da aresta considerando a evaporação e a adição de feromônio
         self.pheromone = (1 - evaporation_constant) * self.pheromone + pheromone_addition
 
-    
-#metodo de roleta
 class Roulette():
-    def __init__(self, itens, distance_expoent, pheromone_expoent):
-        self.itens = itens
+    def __init__(self, 
+                 items:list, 
+                 distance_expoent:float, 
+                 pheromone_expoent:float):
+        
+        self.items = items
         self.distance_expoent = distance_expoent
         self.pheromone_expoent = pheromone_expoent
-        self.total = sum([item.evaluate_arris(self.distance_expoent, self.pheromone_expoent) for item in itens])
-        self.probablities = [item.evaluate_arris(self.distance_expoent, self.pheromone_expoent)/self.total for item in itens]
+        self.total = sum([item.evaluate_arris(self.distance_expoent, self.pheromone_expoent) for item in items])
+        self.probabilities = [item.evaluate_arris(self.distance_expoent, self.pheromone_expoent)/self.total for item in items]
         
     def spin(self):
-        #retorna um item aleatorio, com probabilidade proporcional a sua avaliação
-        return random.choices(self.itens, weights=self.probablities)[0]
+        #Retorna um item aleatorio, com probabilidade proporcional a sua avaliação
+        return random.choices(self.items, weights=self.probabilities)[0]
 
-#metodo de torneio
 class Tourney():
-    def __init__(self, itens, distance_expoent, pheromone_expoent):
-        self.itens = itens
+    def __init__(self, 
+                 items:list, 
+                 distance_expoent:float, 
+                 pheromone_expoent:float):
+        
+        self.items = items
         self.distance_expoent = distance_expoent
         self.pheromone_expoent = pheromone_expoent
 
     def compete(self):
-        #seleciona dois competidores aleatoriamente
-        competitor_1 = random.choices(self.itens)[0]
-        competitor_2 = random.choices(self.itens)[0]
+        #Seleciona dois competidores aleatoriamente, e garante que eles tenham avaliações diferentes.
+        while competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) == competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
+            competitor_1 = random.choice(self.items)
+            competitor_2 = random.choice(self.items)
 
-        #compara os competidores e retorna o vencedor
+        #Compara os competidores e retorna o vencedor
         if competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) > competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_1
         elif competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) < competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_2
-        #se os competidores tiverem a mesma avaliação, retorna um deles aleatoriamente
-        else:
-            return random.choices([competitor_1, competitor_2])[0]
 
 class CompleteGraph():
-    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1):
+    def __init__(self, 
+                 vertex_list:list, 
+                 distance_dict:dict, 
+                 initial_pheromone:float=0.1):
         self.vertex_list = vertex_list
         self.distance_dict = distance_dict
         self.initial_pheromone = initial_pheromone
@@ -87,7 +101,8 @@ class CompleteGraph():
 
         #considerando um grafo completo, ou seja, todos os vertices são interligados
         #cria-se uma lista de instancias da classe Arris, que representa as arestas do grafo
-        #o feromonio inicial de cada aresta é o mesmo, nesse caso 0.1
+        #o feromonio inicial de cada aresta é o mesmo, por padrão 0.1
+
         for origin in vertex_list:
             for destination in vertex_list:
                 if origin != destination:
@@ -95,13 +110,22 @@ class CompleteGraph():
 
         self.arris_list = arris_list
 
-    def update_pheromone(self, generation, update_constant, evaporation_constant):
+    def update_pheromone(self, 
+                         generation:list, 
+                         update_constant:float, 
+                         evaporation_constant:float):
         
         for arris in self.arris_list:
             arris.update_pheromone(generation, update_constant, evaporation_constant)
 
 class Ant():
-    def __init__ (self, current_vertex, graph, method_of_selection, distance_expoent, pheromone_expoent):
+    def __init__ (self, 
+                  current_vertex:str, 
+                  graph:CompleteGraph, 
+                  method_of_selection:str, 
+                  distance_expoent:float, 
+                  pheromone_expoent:float):
+        
         self.current_vertex = current_vertex
         self.visited_vertex = []
         self.visited_vertex.append(current_vertex)
@@ -153,7 +177,17 @@ class Ant():
         return distance
     
 class ACO():
-    def __init__(self, vertex_list, distance_dict, initial_pheromone=0.1, evaporation_constant=0.01, update_constant=2, number_of_epochs=1000, method_of_selection='roulette', distance_expoent=1, pheromone_expoent=1):
+    def __init__(self, 
+                 vertex_list:list, 
+                 distance_dict:dict, 
+                 initial_pheromone:float=0.1, 
+                 evaporation_constant:float=0.01, 
+                 update_constant:float=2, 
+                 number_of_epochs:int=1000, 
+                 method_of_selection:str='roulette', 
+                 distance_expoent:float=1.0, 
+                 pheromone_expoent:float=1.0):
+        
         self.initial_pheromone = initial_pheromone
         self.graph = CompleteGraph(vertex_list, distance_dict, self.initial_pheromone)
         self.evaporation_constant = evaporation_constant
@@ -187,7 +221,7 @@ class ACO():
 
 if __name__ == "__main__":
     #lista dos vertices do grafo, ou seja os pontos que serao visitados
-    #não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles, além do id ou nome
+    #não foi criada uma classe para representar os vertices, pois não há necessidade de armazenar mais informações sobre eles.
     vertex_list = ['A','B','C','D','E']
 
     #lista das distancias entre os vertices do grafo
@@ -204,11 +238,11 @@ if __name__ == "__main__":
               distance_dict, 
               initial_pheromone=0.1, 
               evaporation_constant=0.01, 
-              update_constant=1.5, 
+              update_constant=2, 
               number_of_epochs=50,
               method_of_selection='roulette',
               distance_expoent=1,
-              pheromone_expoent=1.5)
+              pheromone_expoent=2)
 
     #executa o algoritmo
     aco.run()

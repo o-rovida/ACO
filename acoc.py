@@ -225,7 +225,7 @@ if __name__ == "__main__":
     data_list = data.values.tolist()
     data_object_list = []
     
-    for i in range(100): #range(len(data_list)):
+    for i in range(len(data_list)):
         data_object_list.append(DataObject(i, data_list[i]))
 
     graph = ACOCGraph(data_object_list, number_of_clusters=3, initial_pheromone=0.1)
