@@ -189,7 +189,7 @@ class Ant():
 class ACOC():
     def __init__ (self, 
                   graph: ACOCGraph, 
-                  number_of_epochs: int, 
+                  number_of_epochs: int,
                   number_of_clusters: int, 
                   number_of_ant: int, 
                   distance_expoent: float, 
