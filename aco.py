@@ -77,16 +77,19 @@ class Tourney():
         self.pheromone_expoent = pheromone_expoent
 
     def compete(self):
-        #Seleciona dois competidores aleatoriamente, e garante que eles tenham avaliações diferentes.
-        while competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) == competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
-            competitor_1 = random.choice(self.items)
-            competitor_2 = random.choice(self.items)
-
+        competitor_1 = random.choice(self.items)
+        competitor_2 = random.choice(self.items)
+        
         #Compara os competidores e retorna o vencedor
         if competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) > competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_1
         elif competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) < competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
             return competitor_2
+        # se os competidores tiverem a mesma avaliação, retorna um deles aleatoriamente
+        elif competitor_1.evaluate_arris(self.distance_expoent, self.pheromone_expoent) == competitor_2.evaluate_arris(self.distance_expoent, self.pheromone_expoent):
+            return random.choice([competitor_1, competitor_2])
+        else:
+            raise Exception("Error: Invalid evaluation")
 
 class CompleteGraph():
     def __init__(self, 
