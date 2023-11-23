@@ -48,3 +48,6 @@ Classe que modela o comportamento de uma formiga, incluindo movimento e cálculo
 
 **ACOC:**
 Classe principal que controla a execução do ACOC.
+
+### Execução
+O código demonstra a execução do ACOC em um exemplo específico, realizando a tarefa de agrupamento em um conjunto de dados. No exemplo fornecido, o ACOC é aplicado ao conjunto de dados do arquivo 'wine.csv', onde os valores foram normalizados para garantir que todos os vetores de dados estejam na faixa de 0 a 1. Isso é feito dividindo cada valor pelo maior valor encontrado em sua respectiva coluna.
