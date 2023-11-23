@@ -278,7 +278,7 @@ if __name__ == "__main__":
                 number_of_elite=NUMBER_OF_ELITE, 
                 evaporation_constant=0.01)
 
-    print("melho avaliação: {}".format(acoc.better_solution.evaluate_solution()))
+    print("melhor avaliação: {}".format(acoc.better_solution.evaluate_solution()))
     print("\n")
 
     for epoch in acoc.epochs_dict.values():
