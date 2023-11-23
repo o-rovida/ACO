@@ -270,7 +270,8 @@ if __name__ == "__main__":
                 number_of_elite=2, 
                 evaporation_constant=0.01)
 
-    print(acoc.better_solution.evaluate_solution())
+    print("melho avaliação: {}".format(acoc.better_solution.evaluate_solution()))
+    print("\n")
 
     for epoch in acoc.epochs_dict.values():
         print("média da avaliação da geração: {}".format(np.mean([ant.evaluate_solution() for ant in epoch['ant']])))

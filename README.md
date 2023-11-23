@@ -25,3 +25,26 @@ A classe principal que orquestra a execução do algoritmo ACO. Inclui métodos 
 O código demonstra a execução do ACO em um exemplo específico, resolvendo o Problema do Caixeiro Viajante para um conjunto de vértices e distâncias definidas.
 
 # Ant Colony Optimization for Clustering (ACOC)
+Este é um exemplo de implementação do Algoritmo de Otimização por Colônia de Formigas para tarefas de agrupamento (ACOC) em Python. O ACOC é uma técnica inspirada no comportamento de formigas reais para encontrar soluções aproximadas para problemas de otimização combinatória, neste caso, o agrupamento de dados.
+
+## Estrutura do Código
+### Funções
+**euclidean_distance(a, b):**
+Função que calcula a distância euclidiana entre dois pontos.
+
+### Classes Principais
+
+**DataObject:**
+Classe que representa um objeto de dados.
+
+**ACOCGraph:**
+Classe que representa o grafo utilizado no ACOC para armazenar feromônios.
+
+**Cluster:**
+Classe que representa um cluster de dados.
+
+**Ant:**
+Classe que modela o comportamento de uma formiga, incluindo movimento e cálculo da distância percorrida.
+
+**ACOC:**
+Classe principal que controla a execução do ACOC.
