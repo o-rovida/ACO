@@ -17,7 +17,8 @@ def euclidean_distance(a, b):
 class DataObject:
     def __init__(self, 
                  id: int, 
-                 data: np.ndarray):
+                 data: np.ndarray,
+                 target:int):
         
         self.id = id
         if isinstance(data, np.ndarray):
@@ -27,6 +28,7 @@ class DataObject:
                 self.data = np.array(data)
             except:
                 raise Exception("The data must be a list or a numpy array")
+        self.target = target
 
     def equals(self, data_object):
 
@@ -247,7 +249,7 @@ class ACOC():
 if __name__ == "__main__":
 
     dataset = pd.read_csv('dataset/wine.csv', sep=',', header=None)
-    target = dataset.iloc[:,0]
+    target = dataset[0]
     data = dataset.drop([0], axis=1)
     # normalizando os dados, dividindo pelo maior valor de cada coluna
     for col in data.columns:
@@ -257,17 +259,23 @@ if __name__ == "__main__":
     data_object_list = []
     
     for i in range(len(data_list)):
-        data_object_list.append(DataObject(i, data_list[i]))
+        data_object_list.append(DataObject(id=i, data=data_list[i], target=target[i]))
 
     graph = ACOCGraph(data_object_list, number_of_clusters=3, initial_pheromone=0.1)
 
+    NUMBER_OF_ANT = int(round(len(data_object_list)*0.05,0))
+    NUMBER_OF_ELITE = int(round(NUMBER_OF_ANT*0.2))
+
+    print("numero de formigas: {}".format(NUMBER_OF_ANT))
+    print("numero de formigas de elite: {}".format(NUMBER_OF_ELITE))
+
     acoc = ACOC(graph,
-                number_of_epochs=5, 
+                number_of_epochs=10, 
                 number_of_clusters=3, 
-                number_of_ant=5, 
+                number_of_ant=NUMBER_OF_ANT, 
                 distance_expoent=1, 
                 pheromone_expoent=1, 
-                number_of_elite=2, 
+                number_of_elite=NUMBER_OF_ELITE, 
                 evaporation_constant=0.01)
 
     print("melho avaliação: {}".format(acoc.better_solution.evaluate_solution()))
@@ -277,7 +285,37 @@ if __name__ == "__main__":
         print("média da avaliação da geração: {}".format(np.mean([ant.evaluate_solution() for ant in epoch['ant']])))
         print('-----------------')
 
-    #for cluster in acoc.better_solution.clusters.values():
-        #print(cluster.cluster_center)
-        #print(len(cluster.data_object_list))
-        #print('-----------------')
+    print("\n")
+    print("melho avaliação: ")
+    
+    i = 0
+    
+    for cluster in acoc.better_solution.clusters.values():
+        
+        i += 1
+
+        print("cluster: {}".format(i))
+        
+        print("centro do cluster: ")
+        print(cluster.cluster_center)
+        print("total de objetos no cluster: ")
+        print(len(cluster.data_object_list))
+        
+        class_1 = []
+        class_2 = []
+        class_3 = []
+
+        class_mapping = {
+            1: class_1,
+            2: class_2,
+            3: class_3
+        }
+
+        for obj in cluster.data_object_list:
+            class_mapping[obj.target].append(obj)
+
+        print("class 1: {}".format(len(class_1)))
+        print("class 2: {}".format(len(class_2)))
+        print("class 3: {}".format(len(class_3)))
+
+        print('-----------------')

@@ -1,5 +1,7 @@
 import random
 import numpy as np
+import matplotlib.pyplot as plt
+
 # Define a seed for the random number generator, para reproduzir os resultados
 random.seed(42)
 # classe que representa uma aresta do grafo, ou seja, o caminho entre dois pontos.
@@ -262,8 +264,6 @@ if __name__ == "__main__":
         print(f'{arris.origin} -> {arris.destination} : {arris.pheromone}')
     
     #plota um grafico com a evolução da avaliação média da população a cada geração
-    import matplotlib.pyplot as plt
-
     plt.plot(list(aco.epochs_dict.keys()), [aco.epochs_dict[epoch]["evaluation"] for epoch in aco.epochs_dict.keys()], color='green')
     plt.xlabel('Epoch')
     plt.ylabel('Evaluation')
